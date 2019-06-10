@@ -2,7 +2,10 @@ package game.systems.network;
 
 import com.artemis.BaseSystem;
 import com.artemis.annotations.Wire;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.TimeUtils;
+import game.AOGame;
+import shared.network.NetworkClient;
 import shared.network.time.TimeSyncRequest;
 import shared.network.time.TimeSyncResponse;
 
@@ -10,7 +13,7 @@ import shared.network.time.TimeSyncResponse;
 public class TimeSync extends BaseSystem {
 
     public static final int SEND_REQUEST_EVERY_X_IN_SEGS = 60;
-    private ClientSystem client;
+    private NetworkClient client;
     private int requestId;
     private long sendTime;
 
@@ -18,6 +21,10 @@ public class TimeSync extends BaseSystem {
     private long timeOffset;
 
     private float time = 0;
+
+    public TimeSync() {
+        client = ((AOGame) Gdx.app.getApplicationListener()).networkClient;
+    }
 
     /**
      * Returns a message to be sent, which should be sent immediately as the send time is tracked.
@@ -30,7 +37,7 @@ public class TimeSync extends BaseSystem {
     }
 
     public void sendRequest() {
-        client.getKryonetClient().sendToAll(send());
+        client.sendToAll(send());
     }
 
     public void receive(TimeSyncResponse response) {

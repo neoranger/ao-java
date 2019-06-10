@@ -5,20 +5,20 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import game.systems.network.ClientSystem;
 import shared.model.lobby.Player;
 import shared.model.lobby.Room;
+import shared.network.NetworkClient;
 import shared.network.lobby.StartGameRequest;
 
 public class RoomScreen extends AbstractScreen {
-    private ClientSystem clientSystem;
+    private NetworkClient networkClient;
     private Room room;
     private Player me;
     private List<Player> playerList;
 
-    public RoomScreen(ClientSystem clientSystem, Room room, Player me) {
+    public RoomScreen(NetworkClient networkClient, Room room, Player me) {
         super();
-        this.clientSystem = clientSystem;
+        this.networkClient = networkClient;
         this.room = room;
         this.me = me;
         updatePlayers();
@@ -44,7 +44,7 @@ public class RoomScreen extends AbstractScreen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 super.clicked(event, x, y);
-                clientSystem.getKryonetClient().sendToAll(new StartGameRequest(room.getId()));
+                networkClient.sendToAll(new StartGameRequest(room.getId()));
             }
         });
 

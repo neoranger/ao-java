@@ -89,7 +89,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-
+//@todo Revisar dictionary
 public class NetworkDictionary extends MarshalDictionary {
 
     public NetworkDictionary() {

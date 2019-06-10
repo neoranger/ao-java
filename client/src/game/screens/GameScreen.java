@@ -21,7 +21,6 @@ import game.systems.camera.CameraFocusSystem;
 import game.systems.camera.CameraMovementSystem;
 import game.systems.camera.CameraSystem;
 import game.systems.map.TiledMapSystem;
-import game.systems.network.ClientSystem;
 import game.systems.network.TimeSync;
 import game.systems.physics.MovementProcessorSystem;
 import game.systems.physics.MovementSystem;
@@ -30,9 +29,9 @@ import game.systems.physics.PlayerInputSystem;
 import game.systems.render.ui.CoordinatesRenderingSystem;
 import game.systems.render.world.*;
 import game.ui.GUI;
-import net.mostlyoriginal.api.network.marshal.common.MarshalStrategy;
 import shared.model.lobby.Player;
 import shared.model.map.Tile;
+import shared.network.NetworkClient;
 import shared.network.lobby.player.PlayerLoginRequest;
 
 import static com.artemis.E.E;
@@ -47,20 +46,19 @@ public class GameScreen extends ScreenAdapter {
     public static World world;
     public static int player = -1;
     private static GUI gui = new GUI();
-    private static ClientSystem clientSystem;
+    private static NetworkClient networkClient;
     protected FPSLogger logger;
     protected GameState state;
     private SpriteBatch spriteBatch;
     private CameraSystem cameraSystem;
 
     public GameScreen(String host, int port, Player player) {
-        this.clientSystem = new ClientSystem(host, port);
         this.spriteBatch = new SpriteBatch();
         this.logger = new FPSLogger();
         long start = System.currentTimeMillis();
-        clientSystem.start();
         initWorld();
-        clientSystem.getKryonetClient().sendToAll(new PlayerLoginRequest(player));
+        networkClient = ((AOGame) Gdx.app.getApplicationListener()).networkClient; //@todo hotfix
+        networkClient.sendToAll(new PlayerLoginRequest(player));
         Gdx.app.log("Game screen initialization", "Elapsed time: " + (System.currentTimeMillis() - start)) ;
     }
 
@@ -75,8 +73,8 @@ public class GameScreen extends ScreenAdapter {
         GUI.getUserTable().refresh();
     }
 
-    public static MarshalStrategy getClient() {
-        return clientSystem.getKryonetClient();
+    public static NetworkClient getClient() {
+        return networkClient;
     }
 
     public static GUI getGui() {
@@ -91,7 +89,6 @@ public class GameScreen extends ScreenAdapter {
         WorldConfigurationBuilder worldConfigBuilder = new WorldConfigurationBuilder();
         cameraSystem = new CameraSystem(AOGame.GAME_SCREEN_ZOOM);
         worldConfigBuilder.with(new SuperMapper())
-                .with(clientSystem)
                 .with(HIGH, new TimeSync())
                 // Player movement
                 .with(HIGH, new PlayerInputSystem())
@@ -217,7 +214,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        clientSystem.getKryonetClient().stop();
+        networkClient.dispose();
         gui.dispose();
         world.dispose();
     }

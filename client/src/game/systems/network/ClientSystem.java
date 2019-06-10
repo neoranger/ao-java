@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.esotericsoftware.minlog.Log;
 import game.network.ClientResponseProcessor;
 import game.network.GameNotificationProcessor;
-import game.network.KryonetClientMarshalStrategy;
+import game.network.KryonetClient;
 import net.mostlyoriginal.api.network.system.MarshalSystem;
 import shared.network.init.NetworkDictionary;
 import shared.network.interfaces.INotification;
@@ -17,10 +17,14 @@ public class ClientSystem extends MarshalSystem {
     public static IResponseProcessor responseProcessor = new ClientResponseProcessor();
     public static INotificationProcessor notificationProcessor = new GameNotificationProcessor();
 
+    public ClientSystem() {
+        super(null,null);
+    }
+/* @todo hay que comentar esto para que compile
     public ClientSystem(String host, int port) {
         super(new NetworkDictionary(), new KryonetClientMarshalStrategy(host, port));
     }
-
+*/
     @Override
     public void received(int connectionId, Object object) {
         Gdx.app.postRunnable(() -> {
@@ -32,8 +36,9 @@ public class ClientSystem extends MarshalSystem {
             }
         });
     }
-
+/*
     public KryonetClientMarshalStrategy getKryonetClient() {
         return (KryonetClientMarshalStrategy) getMarshal();
     }
+*/
 }

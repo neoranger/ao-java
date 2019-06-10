@@ -5,9 +5,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
-import game.systems.network.ClientSystem;
 import shared.model.lobby.Player;
 import shared.model.lobby.Room;
+import shared.network.NetworkClient;
 import shared.network.lobby.CreateRoomRequest;
 import shared.network.lobby.JoinRoomRequest;
 
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 public class LobbyScreen extends AbstractScreen {
 
     private final Player player;
-    private ClientSystem clientSystem;
+    private NetworkClient networkClient;
     private Set<Room> rooms;
     private List<Room> roomList;
 
-    public LobbyScreen(ClientSystem clientSystem, Player player, Room[] rooms) {
+    public LobbyScreen(NetworkClient networkClient, Player player, Room[] rooms) {
         super();
-        this.clientSystem = clientSystem;
+        this.networkClient = networkClient;
         this.player = player;
         this.rooms = new HashSet<>(Arrays.stream(rooms).collect(Collectors.toSet()));
         updateRooms();
@@ -50,7 +50,7 @@ public class LobbyScreen extends AbstractScreen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 super.clicked(event, x, y);
-                clientSystem.getKryonetClient().sendToAll(new CreateRoomRequest(10));
+                networkClient.sendToAll(new CreateRoomRequest(10));
             }
         });
 
@@ -61,7 +61,7 @@ public class LobbyScreen extends AbstractScreen {
                 super.clicked(event, x, y);
                 Room selected = roomList.getSelected();
                 if (selected != null && !selected.isFull()) {
-                    clientSystem.getKryonetClient().sendToAll(new JoinRoomRequest(selected.getId()));
+                    networkClient.sendToAll(new JoinRoomRequest(selected.getId()));
                 }
             }
         });
@@ -77,9 +77,4 @@ public class LobbyScreen extends AbstractScreen {
     private void updateRooms() {
         roomList.setItems(new Array(rooms.toArray()));
     }
-
-    public ClientSystem getClientSystem() {
-        return clientSystem;
-    }
-
 }

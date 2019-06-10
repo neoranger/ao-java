@@ -30,6 +30,7 @@ public class ScreenManager {
         Screen currentScreen = game.getScreen();
 
         // Show new screen
+        // @todo pasar como parámetro a las screens el AOGame
         Screen newScreen = screenEnum.getScreen(params);
         game.setScreen(newScreen);
 

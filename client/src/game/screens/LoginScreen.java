@@ -1,35 +1,37 @@
 package game.screens;
 
-import com.artemis.World;
-import com.artemis.WorldConfigurationBuilder;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import game.AOGame;
 import game.handlers.MusicHandler;
-import game.systems.network.ClientSystem;
-import net.mostlyoriginal.api.network.marshal.common.MarshalState;
 import shared.interfaces.Hero;
+import shared.network.NetworkClient;
 import shared.network.lobby.JoinLobbyRequest;
 
 public class LoginScreen extends AbstractScreen {
-
+/*
     private static final String SERVER_IP = "ec2-18-231-116-111.sa-east-1.compute.amazonaws.com";
     private static final int SERVER_PORT = 7666;
-    private ClientSystem clientSystem;
-    private World world;
+ */
+    private static final String SERVER_IP = "127.0.0.1";
+    private static final int SERVER_PORT = 7666;
 
+    private NetworkClient networkClient;
 
     public LoginScreen() {
         super();
+        /**
+         * @todo cada screen debería guardar una referencia a AOGame y tomar de ahi el cliente
+         * @see ScreenManager
+         */
+        this.networkClient = ((AOGame)Gdx.app.getApplicationListener()).networkClient;
         init();
     }
 
     private void init() {
-        WorldConfigurationBuilder builder = new WorldConfigurationBuilder();
-        clientSystem = new ClientSystem(SERVER_IP, SERVER_PORT);
-        world = new World(builder.with(clientSystem).build());
-        clientSystem.start();
         MusicHandler.playMusic(101);
     }
 
@@ -92,35 +94,15 @@ public class LoginScreen extends AbstractScreen {
         getStage().setKeyboardFocus(username);
     }
 
-    @Override
-    public void render(float delta) {
-        world.process();
-        super.render(delta);
-    }
-
-    private void connectThenLogin(String ip, int port, String user, Hero hero) {
-        if (clientSystem.getState() != MarshalState.STARTING && clientSystem.getState() != MarshalState.STOPPING) {
-            if (clientSystem.getState() != MarshalState.STOPPED)
-                clientSystem.stop();
-            if (clientSystem.getState() == MarshalState.STOPPED) {
-
-                clientSystem.getKryonetClient().setHost(ip);
-                clientSystem.getKryonetClient().setPort(port);
-
-                clientSystem.start();
-                if (clientSystem.getState() == MarshalState.STARTED) {
-                    clientSystem.getKryonetClient().sendToAll(new JoinLobbyRequest(user, hero));
-                } else if (clientSystem.getState() == MarshalState.FAILED_TO_START) {
-                    Dialog dialog = new Dialog("Network error", getSkin());
-                    dialog.text("Failed to connect! :(");
-                    dialog.button("OK");
-                    dialog.show(getStage());
-                }
-            }
-        }
-    }
-
-    public ClientSystem getClientSystem() {
-        return clientSystem;
+    private void connectThenLogin(String host, int port, String user, Hero hero) {
+//        try {
+            networkClient.connect(host, port);
+            networkClient.sendToAll(new JoinLobbyRequest(user, hero));
+/*        } catch() {
+            Dialog dialog = new Dialog("Network error", getSkin());
+            dialog.text("Failed to connect! :(");
+            dialog.button("OK");
+            dialog.show(getStage());
+        }*/ //@todo implementar algun manejo de errores
     }
 }

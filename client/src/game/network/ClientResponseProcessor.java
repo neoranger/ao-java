@@ -28,22 +28,25 @@ public class ClientResponseProcessor implements IResponseProcessor {
     @Override
     public void processResponse(CreateRoomResponse createRoomResponse) {
         AOGame game = (AOGame) Gdx.app.getApplicationListener();
-        LobbyScreen lobby = (LobbyScreen) game.getScreen();
-        game.toRoom(lobby.getClientSystem(), createRoomResponse.getRoom(), createRoomResponse.getPlayer());
+        game.toRoom(game.networkClient, createRoomResponse.getRoom(), createRoomResponse.getPlayer());
     }
+
+    /**
+     * @todo Pasar el networkClient como parámetro acá pincha capas, las screens deberían guardar referencia de AOGame
+     * Y tomar de ahi el cliente, o algo asi...
+     * la referencia se puede pasar a través del ScreenManager
+     */
 
     @Override
     public void processResponse(JoinLobbyResponse joinLobbyResponse) {
         AOGame game = (AOGame) Gdx.app.getApplicationListener();
-        LoginScreen login = (LoginScreen) game.getScreen();
-        game.toLobby(joinLobbyResponse.getPlayer(), joinLobbyResponse.getRooms(), login.getClientSystem());
+        game.toLobby(joinLobbyResponse.getPlayer(), joinLobbyResponse.getRooms(), game.networkClient);
     }
 
     @Override
     public void processResponse(JoinRoomResponse joinRoomResponse) {
         AOGame game = (AOGame) Gdx.app.getApplicationListener();
-        LobbyScreen lobby = (LobbyScreen) game.getScreen();
-        game.toRoom(lobby.getClientSystem(), joinRoomResponse.getRoom(), joinRoomResponse.getPlayer());
+        game.toRoom(game.networkClient, joinRoomResponse.getRoom(), joinRoomResponse.getPlayer());
     }
 
     @Override
