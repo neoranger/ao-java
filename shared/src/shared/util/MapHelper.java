@@ -88,6 +88,7 @@ public class MapHelper {
      */
     public void loadAll() {
         Log.info("Loading maps...");
+
         for (int i = 1; i <= 290; i++) {
             maps.getUnchecked(i);
         }
